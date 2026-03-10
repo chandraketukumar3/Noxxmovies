@@ -30,8 +30,8 @@ const TrailerModal = ({ trailerKey, title, onClose }) => {
 
       {/* Modal box */}
       <div
-        className="relative w-full max-w-4xl rounded-2xl overflow-hidden z-10"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+        className="relative w-full max-w-4xl rounded-2xl overflow-hidden z-10 my-auto flex flex-col"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal header */}
@@ -69,7 +69,7 @@ const TrailerModal = ({ trailerKey, title, onClose }) => {
 
         {/* Video or fallback */}
         <div
-          className="relative w-full"
+          className="relative w-full shrink-0 bg-black"
           style={{ paddingBottom: '56.25%' /* 16:9 */ }}
         >
           {trailerKey ? (
