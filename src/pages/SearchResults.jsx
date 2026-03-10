@@ -32,16 +32,11 @@ const SearchResults = () => {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1
-            className="text-4xl font-bold tracking-wider uppercase mb-4"
+            className="text-4xl font-bold tracking-wider uppercase"
             style={{ color: 'var(--text-primary)' }}
           >
-            Search
+            Search Results
           </h1>
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search for movies, shows, people..."
-            initialValue={query}
-          />
         </div>
 
         {!debouncedQuery.trim() ? (

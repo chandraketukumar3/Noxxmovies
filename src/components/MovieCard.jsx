@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { openAuthModal } from '../redux/slices/uiSlice'
 import LazyImage from './LazyImage'
 
 const TMDB_IMG = (path) =>
@@ -6,6 +8,8 @@ const TMDB_IMG = (path) =>
 
 const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
 
   const {
     id,
@@ -99,7 +103,13 @@ const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
           </button>
           {onTrailerClick && (
             <button
-              onClick={() => onTrailerClick(movie)}
+              onClick={() => {
+                if (!user) {
+                  dispatch(openAuthModal('Sign up or log in to play trailers'))
+                  return
+                }
+                onTrailerClick(movie)
+              }}
               className="flex-1 text-xs py-1 rounded-md font-semibold tracking-wide"
               style={{
                 background: 'rgba(255,255,255,0.1)',

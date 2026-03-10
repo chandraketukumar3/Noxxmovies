@@ -5,6 +5,7 @@ import { closeTrailer } from './redux/slices/trailerSlice'
 import Navbar from './components/Navbar'
 import Loader from './components/Loader'
 import TrailerModal from './components/TrailerModal'
+import AuthModal from './components/AuthModal'
 
 const Home         = lazy(() => import('./pages/Home'))
 const Movies       = lazy(() => import('./pages/Movies'))
@@ -17,6 +18,8 @@ const WatchHistory = lazy(() => import('./pages/WatchHistory'))
 const Login        = lazy(() => import('./pages/Login'))
 const Signup       = lazy(() => import('./pages/Signup'))
 const PersonDetails = lazy(() => import('./pages/PersonDetails'))
+const Profile       = lazy(() => import('./pages/Profile'))
+const Settings      = lazy(() => import('./pages/Settings'))
 
 const PageFallback = () => (
   <div
@@ -43,6 +46,8 @@ const AnimatedRoutes = () => {
         <Route path="/history"   element={<WatchHistory />} />
         <Route path="/login"     element={<Login />} />
         <Route path="/signup"    element={<Signup />} />
+        <Route path="/profile"   element={<Profile />} />
+        <Route path="/settings"  element={<Settings />} />
       </Routes>
     </div>
   )
@@ -71,6 +76,8 @@ function App() {
             onClose={() => dispatch(closeTrailer())}
           />
         )}
+
+        <AuthModal />
       </div>
     </BrowserRouter>
   )

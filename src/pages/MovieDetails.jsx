@@ -5,6 +5,7 @@ import { fetchMovieById, clearMovieDetail } from '../redux/slices/movieDetailSli
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import { toggleFavorite } from '../redux/slices/favoritesSlice'
 import { openTrailer } from '../redux/slices/trailerSlice'
+import { openAuthModal } from '../redux/slices/uiSlice'
 import Loader from '../components/Loader'
 
 const TMDB_IMAGE = (path, size = 'w500') =>
@@ -63,6 +64,10 @@ const MovieDetails = () => {
   const isFavorited = movie ? favoriteIds.has(movie.id) : false
 
   const handleTrailerOpen = () => {
+    if (!user) {
+      dispatch(openAuthModal('Sign up or log in to play trailers'))
+      return
+    }
     if (movie) {
       dispatch(addToHistory(movie))
       dispatch(openTrailer(movie))
@@ -261,7 +266,13 @@ const MovieDetails = () => {
 
               <button
                 className="btn-secondary"
-                onClick={() => dispatch(toggleFavorite(movie))}
+                onClick={() => {
+                  if (!user) {
+                    dispatch(openAuthModal('Sign up or log in to manage favorites'))
+                    return
+                  }
+                  dispatch(toggleFavorite(movie))
+                }}
                 style={
                   isFavorited
                     ? { borderColor: 'var(--primary)', color: 'var(--secondary)' }

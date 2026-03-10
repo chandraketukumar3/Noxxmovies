@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useNavigate, NavLink, Link } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../redux/slices/authSlice'
 import SearchBar from './SearchBar'
 
 const NAV_LINKS = [
@@ -13,13 +14,22 @@ const NAV_LINKS = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const handleLogout = () => {
+    dispatch(logout())
+    setProfileOpen(false)
+    navigate('/')
+  }
 
   const handleSearch = (query) => {
     if (query.trim()) {
@@ -64,27 +74,58 @@ const Navbar = () => {
           {/* Desktop Right Section */}
           <div className="hidden lg:flex items-center gap-4">
             <SearchBar onSearch={handleSearch} />
-            <button
-              aria-label="User profile"
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              style={{ background: 'var(--card)', border: '1.5px solid var(--border)' }}
-            >
-              <svg
-                className="w-5 h-5"
-                style={{ color: 'var(--text-secondary)' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.8}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </button>
+            
+            {user ? (
+              <div className="relative">
+                <button
+                  aria-label="User profile"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:ring-2 hover:ring-primary/50"
+                  style={{ background: 'var(--card)', border: '1.5px solid var(--border)' }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                </button>
+
+                {profileOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setProfileOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-3 w-48 rounded-xl shadow-2xl py-2 z-50 border border-white/10 animate-fade-in"
+                        style={{ background: 'var(--surface)' }}>
+                      <div className="px-4 py-2 border-b border-white/5 mb-1">
+                        <p className="text-sm font-bold truncate text-white">{user.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <Link to="/profile" className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setProfileOpen(false)}>
+                        Profile
+                      </Link>
+                      <Link to="/settings" className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setProfileOpen(false)}>
+                        Settings
+                      </Link>
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/5 transition-colors border-t border-white/5 mt-1"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                  Login
+                </Link>
+                <Link to="/signup" className="btn-primary py-1.5 px-4 text-xs">
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Hamburger */}
@@ -134,6 +175,19 @@ const Navbar = () => {
                   </NavLink>
                 </li>
               ))}
+              {user && (
+                <>
+                  <li><Link to="/profile" className="block py-2 text-text-secondary" onClick={() => setMobileOpen(false)}>Profile</Link></li>
+                  <li><Link to="/settings" className="block py-2 text-text-secondary" onClick={() => setMobileOpen(false)}>Settings</Link></li>
+                  <li><button onClick={handleLogout} className="w-full text-left py-2 text-red-500">Logout</button></li>
+                </>
+              )}
+              {!user && (
+                <div className="flex flex-col gap-2 pt-2">
+                  <Link to="/login" className="btn-secondary py-2 text-center" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link to="/signup" className="btn-primary py-2 text-center" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+                </div>
+              )}
             </ul>
             <div className="mt-4">
               <SearchBar onSearch={handleSearch} />

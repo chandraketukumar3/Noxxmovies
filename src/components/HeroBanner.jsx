@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { openTrailer } from '../redux/slices/trailerSlice'
+import { openAuthModal } from '../redux/slices/uiSlice'
 
 const FALLBACK_BACKDROP =
   'https://via.placeholder.com/1280x720/12121A/A1A1AA?text=NoxMovies'
@@ -40,6 +41,7 @@ const HeroBanner = ({
   genreMap = {},
 }) => {
   const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
   const [imgError, setImgError] = useState(false)
 
   if (!movie) return null
@@ -158,7 +160,13 @@ const HeroBanner = ({
             <div className="flex flex-wrap gap-3">
               <button
                 className="btn-primary"
-                onClick={() => dispatch(openTrailer({ ...movie, trailerKey }))}
+                onClick={() => {
+                  if (!user) {
+                    dispatch(openAuthModal('Sign up or log in to play trailers'))
+                    return
+                  }
+                  dispatch(openTrailer({ ...movie, trailerKey }))
+                }}
                 aria-label={`Play trailer for ${displayTitle}`}
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -180,7 +188,13 @@ const HeroBanner = ({
 
               <button
                 className="btn-secondary"
-                onClick={handleFavorite}
+                onClick={() => {
+                  if (!user) {
+                    dispatch(openAuthModal('Sign up or log in to manage favorites'))
+                    return
+                  }
+                  handleFavorite()
+                }}
                 aria-label={
                   isFavorited
                     ? `Remove ${displayTitle} from favorites`
