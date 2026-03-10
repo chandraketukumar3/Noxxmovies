@@ -9,7 +9,7 @@ const TMDB_IMG = (path) =>
 const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth || {})
 
   const {
     id,

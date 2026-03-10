@@ -41,7 +41,7 @@ const HeroBanner = ({
   genreMap = {},
 }) => {
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth || {})
   const [imgError, setImgError] = useState(false)
 
   if (!movie) return null

@@ -4,7 +4,7 @@ import api from '../services/api'
 import Loader from '../components/Loader'
 
 const Settings = () => {
-  const { user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth || {})
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)

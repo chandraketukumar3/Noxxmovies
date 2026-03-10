@@ -36,7 +36,7 @@ const StarRow = ({ value }) => {
 
 const MovieDetails = () => {
   const { id } = useParams()
-  const { user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth || {})
   const navigate = useNavigate()
   const dispatch = useDispatch()
 

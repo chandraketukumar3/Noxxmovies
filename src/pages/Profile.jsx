@@ -4,7 +4,7 @@ import api from '../services/api'
 import Loader from '../components/Loader'
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth || {})
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
