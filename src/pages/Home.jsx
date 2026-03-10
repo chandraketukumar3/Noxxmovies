@@ -105,7 +105,7 @@ const Home = () => {
     <div>
       <HeroBanner
         movie={heroBanner}
-        trailerKey={null}
+        movieId={heroBanner?.id}
         isFavorited={heroBanner ? favoriteIds.has(heroBanner.id) : false}
         onMoreInfo={handleMoreInfo}
         onAddToFavorites={handleAddToFavorites}
@@ -170,7 +170,7 @@ const Home = () => {
 
       {activeTrailer && (
         <TrailerModal
-          trailerKey={null}
+          movieId={activeTrailer.id}
           title={activeTrailer.title || activeTrailer.name}
           onClose={() => setActiveTrailer(null)}
         />

@@ -284,7 +284,7 @@ const MovieDetails = () => {
 
       {showTrailer && (
         <TrailerModal
-          trailerKey={null}
+          movieId={movie.id}
           title={displayTitle}
           onClose={() => setShowTrailer(false)}
         />

@@ -30,7 +30,7 @@ const StarRating = ({ value }) => {
 
 const HeroBanner = ({
   movie,
-  trailerKey = null,
+  movieId = null,
   isFavorited = false,
   onMoreInfo,
   onAddToFavorites,
@@ -212,7 +212,7 @@ const HeroBanner = ({
 
       {showTrailer && (
         <TrailerModal
-          trailerKey={trailerKey}
+          movieId={movieId}
           title={displayTitle}
           onClose={() => setShowTrailer(false)}
         />
