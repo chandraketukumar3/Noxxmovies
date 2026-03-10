@@ -54,7 +54,7 @@ const TrailerModal = ({ movieId, title, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      className="fixed top-0 left-0 w-[100vw] h-[100vh] z-[9999] flex items-center justify-center overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-label={`Trailer: ${title}`}
@@ -69,7 +69,7 @@ const TrailerModal = ({ movieId, title, onClose }) => {
 
       {/* Modal box */}
       <div
-        className="relative w-full max-w-4xl rounded-2xl overflow-hidden z-10 my-auto flex flex-col"
+        className="relative w-[90%] max-w-[900px] rounded-2xl overflow-hidden z-10 flex flex-col shadow-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
