@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
-import { getTVShows, getTVShowsByGenre } from '../services/moviesService'
+import { getTVShows, getTVShowsByGenre, getAnime } from '../services/moviesService'
 import PaginatedMovieRow from '../components/PaginatedMovieRow'
 import TrailerModal from '../components/TrailerModal'
 import MovieCard from '../components/MovieCard'
@@ -79,8 +79,8 @@ const TVShows = () => {
 
       <PaginatedMovieRow 
         title="Action" 
-        genreId={28}
-        fetchFn={(p) => getTVShowsByGenre(28, p)} 
+        genreId={10759}
+        fetchFn={(p) => getTVShowsByGenre(10759, p)} 
         onTrailerClick={handleTrailerClick} 
       />
 
@@ -88,6 +88,13 @@ const TVShows = () => {
         title="Comedy" 
         genreId={35}
         fetchFn={(p) => getTVShowsByGenre(35, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      <PaginatedMovieRow 
+        title="Anime" 
+        genreId={16}
+        fetchFn={(p) => getAnime(p)} 
         onTrailerClick={handleTrailerClick} 
       />
 

@@ -30,3 +30,6 @@ export const getBollywoodMovies = (page = 1) =>
 
 export const getBollywoodTV = (page = 1) =>
   api.get('/movies/bollywood/tv', { params: { page } })
+
+export const getAnime = (page = 1) =>
+  api.get('/movies/anime/tv', { params: { page } })

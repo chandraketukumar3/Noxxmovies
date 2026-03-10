@@ -11,13 +11,14 @@ import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 import api from '../services/api'
-import { getTrending, getMoviesByGenre } from '../services/moviesService'
+import { getTrending, getMoviesByGenre, getAnime } from '../services/moviesService'
 
 const GENRE_ROWS = [
   { label: 'Action', id: 28 },
   { label: 'Drama', id: 18 },
   { label: 'Science Fiction', id: 878 },
   { label: 'Comedy', id: 35 },
+  { label: 'Anime', id: 16, isAnime: true },
 ]
 
 const Home = () => {
@@ -89,11 +90,12 @@ const Home = () => {
           onTrailerClick={handleTrailerClick}
         />
 
-        {GENRE_ROWS.map(({ label, id }) => (
+        {GENRE_ROWS.map(({ label, id, isAnime }) => (
           <PaginatedMovieRow
             key={id}
             title={label}
-            fetchFn={(p) => getMoviesByGenre(id, p)}
+            genreId={id}
+            fetchFn={(p) => isAnime ? getAnime(p) : getMoviesByGenre(id, p)}
             onTrailerClick={handleTrailerClick}
           />
         ))}

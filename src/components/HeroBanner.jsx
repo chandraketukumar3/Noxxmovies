@@ -214,6 +214,7 @@ const HeroBanner = ({
         <TrailerModal
           movieId={movieId}
           title={displayTitle}
+          mediaType={movie.first_air_date ? 'tv' : 'movie'}
           onClose={() => setShowTrailer(false)}
         />
       )}

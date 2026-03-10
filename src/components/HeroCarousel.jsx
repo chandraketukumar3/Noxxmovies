@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
+import { toggleFavorite } from '../redux/slices/favoritesSlice';
 import { getBollywoodMovies, getBollywoodTV } from '../services/moviesService';
 import HeroBanner from './HeroBanner';
 import Loader from './Loader';
@@ -7,8 +10,14 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const HeroCarousel = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const favoriteIds = useSelector((state) =>
+        new Set(state.favorites.items.map((m) => m.id))
+    );
 
     useEffect(() => {
         const fetchCarouselData = async () => {
@@ -37,9 +46,17 @@ const HeroCarousel = () => {
         fetchCarouselData();
     }, []);
 
+    const handleMoreInfo = (movie) => {
+        navigate(`/movies/${movie.id}`);
+    };
+
+    const handleAddToFavorites = (movie) => {
+        dispatch(toggleFavorite(movie));
+    };
+
     const settings = {
         dots: true,
-        infinite: true,
+        infinite: items.length > 1,
         speed: 800,
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -62,6 +79,9 @@ const HeroCarousel = () => {
                         <HeroBanner 
                             movie={item} 
                             movieId={item.id}
+                            isFavorited={favoriteIds.has(item.id)}
+                            onMoreInfo={handleMoreInfo}
+                            onAddToFavorites={handleAddToFavorites}
                         />
                     </div>
                 ))}
