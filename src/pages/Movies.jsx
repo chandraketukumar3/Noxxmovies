@@ -1,20 +1,19 @@
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchTrending } from '../redux/slices/moviesSlice'
-import MovieRow from '../components/MovieRow'
+import { useDispatch } from 'react-redux'
+import { addToHistory } from '../redux/slices/watchHistorySlice'
+import { toggleFavorite } from '../redux/slices/favoritesSlice'
+import { getMovies, getMoviesByGenre } from '../services/moviesService'
+import PaginatedMovieRow from '../components/PaginatedMovieRow'
+import { useState } from 'react'
+import TrailerModal from '../components/TrailerModal'
 
 const Movies = () => {
   const dispatch = useDispatch()
-  const { trending, loading } = useSelector((state) => state.movies)
+  const [activeTrailer, setActiveTrailer] = useState(null)
 
-  useEffect(() => {
-    if (trending.length === 0) dispatch(fetchTrending())
-  }, [dispatch, trending.length])
-
-  const movies = trending.filter((m) => m.media_type === 'movie' || !m.media_type)
-  const actionMovies = movies.filter((m) => m.genre_ids?.includes(28))
-  const thrillerMovies = movies.filter((m) => m.genre_ids?.includes(53))
-  const scifiMovies = movies.filter((m) => m.genre_ids?.includes(878))
+  const handleTrailerClick = (movie) => {
+    dispatch(addToHistory(movie))
+    setActiveTrailer(movie)
+  }
 
   return (
     <div className="min-h-screen py-8" style={{ background: 'var(--bg)' }}>
@@ -30,15 +29,36 @@ const Movies = () => {
         </p>
       </div>
 
-      <MovieRow title="All Movies" movies={movies} loading={loading} />
-      {(loading || actionMovies.length > 0) && (
-        <MovieRow title="Action" movies={actionMovies} loading={loading} />
-      )}
-      {(loading || thrillerMovies.length > 0) && (
-        <MovieRow title="Thriller" movies={thrillerMovies} loading={loading} />
-      )}
-      {(loading || scifiMovies.length > 0) && (
-        <MovieRow title="Science Fiction" movies={scifiMovies} loading={loading} />
+      <PaginatedMovieRow 
+        title="All Movies" 
+        fetchFn={getMovies} 
+        onTrailerClick={handleTrailerClick} 
+      />
+      
+      <PaginatedMovieRow 
+        title="Action" 
+        fetchFn={(p) => getMoviesByGenre(28, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      <PaginatedMovieRow 
+        title="Thriller" 
+        fetchFn={(p) => getMoviesByGenre(53, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      <PaginatedMovieRow 
+        title="Science Fiction" 
+        fetchFn={(p) => getMoviesByGenre(878, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      {activeTrailer && (
+        <TrailerModal
+          movieId={activeTrailer.id}
+          title={activeTrailer.title || activeTrailer.name}
+          onClose={() => setActiveTrailer(null)}
+        />
       )}
     </div>
   )

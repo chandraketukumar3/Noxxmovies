@@ -1,32 +1,53 @@
-import { useRef, useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import Slider from 'react-slick'
 import MovieCard from './MovieCard'
 import SkeletonLoader from './SkeletonLoader'
-import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
-const PAGE_SIZE = 10
+// Import slick-carousel css
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const MovieRow = ({
   title,
   movies = [],
   loading = false,
   onTrailerClick,
+  onLoadMore, // Callback to fetch more from API
 }) => {
-  const rowRef = useRef(null)
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [hasMore, setHasMore] = useState(true)
 
-  const visibleMovies = movies.slice(0, visibleCount)
-  const hasMore = visibleCount < movies.length
-
-  const loadMore = useCallback(() => {
-    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, movies.length))
-  }, [movies.length])
-
-  const { sentinelRef } = useInfiniteScroll(loadMore, hasMore, loading)
-
-  const scroll = (dir) => {
-    if (!rowRef.current) return
-    const amount = rowRef.current.offsetWidth * 0.75
-    rowRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' })
+  // Carousel settings requested by user
+  const settings = {
+    infinite: movies.length > 6, // Only infinite if we have enough items
+    speed: 500,
+    slidesToShow: 6,
+    slidesToScroll: 2,
+    arrows: true,
+    lazyLoad: "ondemand",
+    beforeChange: (current, next) => {
+      // If we are near the total length, trigger load more
+      if (onLoadMore && next >= movies.length - 8 && !loading) {
+        onLoadMore()
+      }
+    },
+    responsive: [
+      {
+        breakpoint: 1280,
+        settings: { slidesToShow: 5 }
+      },
+      {
+        breakpoint: 1024,
+        settings: { slidesToShow: 4 }
+      },
+      {
+        breakpoint: 768,
+        settings: { slidesToShow: 3 }
+      },
+      {
+        breakpoint: 480,
+        settings: { slidesToShow: 2 }
+      }
+    ]
   }
 
   return (
@@ -40,79 +61,59 @@ const MovieRow = ({
           >
             {title}
           </h2>
-          <div className="flex gap-2">
-            {[
-              { dir: 'left',  icon: 'M15 19l-7-7 7-7',  label: 'Scroll left' },
-              { dir: 'right', icon: 'M9 5l7 7-7 7',     label: 'Scroll right' },
-            ].map(({ dir, icon, label }) => (
-              <button
-                key={dir}
-                onClick={() => scroll(dir)}
-                aria-label={label}
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-secondary)',
-                  transition: 'border-color 0.2s, transform 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--primary)'
-                  e.currentTarget.style.transform = 'scale(1.1)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border)'
-                  e.currentTarget.style.transform = 'scale(1)'
-                }}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
-                </svg>
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Scrollable row */}
-        {loading ? (
+        {/* Slider row */}
+        {loading && movies.length === 0 ? (
           <SkeletonLoader count={7} />
         ) : movies.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             No content available.
           </p>
         ) : (
-          <>
-            <div
-              ref={rowRef}
-              className="flex gap-4 overflow-x-auto no-scrollbar pb-2 relative"
-              role="list"
-            >
-              {visibleMovies.map((movie, index) => (
+          <div className="movie-carousel-container relative">
+            <Slider {...settings}>
+              {movies.map((movie, index) => (
                 <div
-                  key={movie.id}
-                  role="listitem"
-                  className="animate-fade-in shrink-0"
-                  style={{ animationDelay: `${Math.min(index, 9) * 40}ms`, animationFillMode: 'both' }}
+                  key={`${movie.id}-${index}`}
+                  className="px-2 outline-none"
                 >
                   <MovieCard movie={movie} onTrailerClick={onTrailerClick} />
                 </div>
               ))}
-              
-              {/* Infinite scroll sentinel — triggers when user scrolls horizontally to the end */}
-              <div ref={sentinelRef} className="scroll-sentinel w-10 shrink-0" aria-hidden="true" />
-            </div>
-
-            {hasMore && (
-              <p
-                className="mt-2 text-xs text-center"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Scroll to load more…
-              </p>
-            )}
-          </>
+            </Slider>
+          </div>
         )}
       </div>
+      
+      {/* Custom Styles for Slider Arrows */}
+      <style>{`
+        .slick-prev, .slick-next {
+          z-index: 20;
+          width: 40px;
+          height: 40px;
+          background: rgba(0,0,0,0.5) !important;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+        }
+        .slick-prev:hover, .slick-next:hover {
+          background: var(--primary) !important;
+          transform: scale(1.1);
+        }
+        .slick-prev { left: -20px; }
+        .slick-next { right: -20px; }
+        .slick-prev:before, .slick-next:before {
+          font-family: 'slick';
+          font-size: 24px;
+        }
+        .movie-carousel-container .slick-list {
+          overflow: visible;
+          padding: 10px 0;
+        }
+        .movie-carousel-container .slick-track {
+          display: flex !important;
+        }
+      `}</style>
     </section>
   )
 }

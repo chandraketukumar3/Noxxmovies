@@ -1,32 +1,30 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { searchMovies, clearSearch } from '../redux/slices/searchSlice'
+import { useDispatch } from 'react-redux'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import useDebounce from '../hooks/useDebounce'
-import MovieRow from '../components/MovieRow'
+import PaginatedMovieRow from '../components/PaginatedMovieRow'
 import SearchBar from '../components/SearchBar'
 import Loader from '../components/Loader'
+import { searchMovies } from '../services/moviesService'
+import TrailerModal from '../components/TrailerModal'
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { results, loading, error } = useSelector((state) => state.search)
 
   const query = searchParams.get('q') || ''
   const debouncedQuery = useDebounce(query, 500)
-
-  useEffect(() => {
-    if (debouncedQuery.trim()) {
-      dispatch(searchMovies(debouncedQuery.trim()))
-    } else {
-      dispatch(clearSearch())
-    }
-  }, [debouncedQuery, dispatch])
+  const [activeTrailer, setActiveTrailer] = useState(null)
 
   const handleSearch = (q) => {
     if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`)
+  }
+
+  const handleTrailerClick = (movie) => {
+    dispatch(addToHistory(movie))
+    setActiveTrailer(movie)
   }
 
   return (
@@ -44,32 +42,9 @@ const SearchResults = () => {
             placeholder="Search for movies, shows, people..."
             initialValue={query}
           />
-          {query && !loading && (
-            <p className="mt-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {results.length > 0 ? (
-                <>
-                  Found{' '}
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {results.length}
-                  </span>{' '}
-                  results for{' '}
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
-                    &quot;{query}&quot;
-                  </span>
-                </>
-              ) : (
-                <>
-                  No results found for{' '}
-                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
-                    &quot;{query}&quot;
-                  </span>
-                </>
-              )}
-            </p>
-          )}
         </div>
 
-        {!query ? (
+        {!debouncedQuery.trim() ? (
           <div
             className="flex flex-col items-center justify-center py-24 rounded-2xl"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
@@ -93,28 +68,23 @@ const SearchResults = () => {
               Start typing to search
             </p>
           </div>
-        ) : loading ? (
-          <div className="flex justify-center py-20">
-            <Loader size="lg" label="Searching..." />
-          </div>
-        ) : error ? (
-          <div
-            className="rounded-2xl p-10 text-center"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <p className="text-base font-semibold" style={{ color: 'var(--secondary)' }}>
-              Search failed: {error}
-            </p>
-          </div>
         ) : (
-          <MovieRow
-            title={`Results for "${query}"`}
-            movies={results}
-            loading={false}
-            onTrailerClick={(movie) => dispatch(addToHistory(movie))}
+          <PaginatedMovieRow
+            key={debouncedQuery} // Re-mount row when query changes
+            title={`Results for "${debouncedQuery}"`}
+            fetchFn={(p) => searchMovies(debouncedQuery, p)}
+            onTrailerClick={handleTrailerClick}
           />
         )}
       </div>
+
+      {activeTrailer && (
+        <TrailerModal
+          movieId={activeTrailer.id}
+          title={activeTrailer.title || activeTrailer.name}
+          onClose={() => setActiveTrailer(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { fetchTrending, fetchGenres } from '../redux/slices/moviesSlice'
+import { fetchGenres } from '../redux/slices/moviesSlice'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import { toggleFavorite } from '../redux/slices/favoritesSlice'
 import HeroBanner from '../components/HeroBanner'
@@ -11,6 +11,8 @@ import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 import api from '../services/api'
+import { getTrending, getMoviesByGenre } from '../services/moviesService'
+import PaginatedMovieRow from '../components/PaginatedMovieRow'
 
 const GENRE_ROWS = [
   { label: 'Action', id: 28 },
@@ -23,46 +25,43 @@ const Home = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // SAFE trending default
-  const { trending = [], loading } = useSelector((state) => state.movies)
-
+  const { genres } = useSelector((state) => state.movies)
   const favoriteIds = useSelector((state) =>
     new Set(state.favorites.items.map((m) => m.id))
   )
 
+  const [trendingHero, setTrendingHero] = useState(null)
   const [activeTrailer, setActiveTrailer] = useState(null)
 
-  // Infinite scroll states
-  const [page, setPage] = useState(2)
+  // Infinite scroll states for bottom "Discover More"
+  const [page, setPage] = useState(1)
   const [moreMovies, setMoreMovies] = useState([])
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
 
   useEffect(() => {
-    dispatch(fetchTrending())
     dispatch(fetchGenres())
+    // Fetch initial trending for HeroBanner
+    getTrending(1).then(res => {
+      if (res.data?.results?.length > 0) {
+        setTrendingHero(res.data.results[0])
+      }
+    })
   }, [dispatch])
 
-  const loadMore = useCallback(async () => {
+  const loadMoreDiscover = useCallback(async () => {
     if (loadingMore || !hasMore) return
-
     setLoadingMore(true)
 
     try {
       const res = await api.get(`/movies/trending`, { params: { page } })
-
-      const results = Array.isArray(res?.data) ? res.data : []
+      const results = Array.isArray(res?.data) ? res.data : (res.data?.results || [])
 
       if (results.length > 0) {
         setMoreMovies((prev) => {
-          const newMovies = results.filter(
-            (m) =>
-              !prev.some((p) => p.id === m.id) &&
-              !trending.some((t) => t.id === m.id)
-          )
+          const newMovies = results.filter(m => !prev.some(p => p.id === m.id))
           return [...prev, ...newMovies]
         })
-
         setPage((p) => p + 1)
       } else {
         setHasMore(false)
@@ -73,24 +72,9 @@ const Home = () => {
     } finally {
       setLoadingMore(false)
     }
-  }, [page, loadingMore, hasMore, trending])
+  }, [page, loadingMore, hasMore])
 
-  const { sentinelRef } = useInfiniteScroll(loadMore, hasMore, loadingMore)
-
-  // SAFE hero banner
-  const heroBanner =
-    Array.isArray(trending) && trending.length > 0 ? trending[0] : null
-
-  // SAFE slice
-  const popular = Array.isArray(trending) ? trending.slice(1, 13) : []
-
-  // SAFE genre rows
-  const genreRows = GENRE_ROWS.map(({ label, id }) => ({
-    label,
-    movies: Array.isArray(trending)
-      ? trending.filter((m) => m.genre_ids?.includes(id))
-      : [],
-  }))
+  const { sentinelRef } = useInfiniteScroll(loadMoreDiscover, hasMore, loadingMore)
 
   const handleTrailerClick = (movie) => {
     dispatch(addToHistory(movie))
@@ -104,59 +88,52 @@ const Home = () => {
   return (
     <div>
       <HeroBanner
-        movie={heroBanner}
-        movieId={heroBanner?.id}
-        isFavorited={heroBanner ? favoriteIds.has(heroBanner.id) : false}
+        movie={trendingHero}
+        movieId={trendingHero?.id}
+        isFavorited={trendingHero ? favoriteIds.has(trendingHero.id) : false}
         onMoreInfo={handleMoreInfo}
         onAddToFavorites={handleAddToFavorites}
       />
 
       <div className="py-2">
-        <MovieRow
+        <PaginatedMovieRow
           title="Trending Now"
-          movies={popular}
-          loading={loading}
+          fetchFn={(p) => getTrending(p)}
           onTrailerClick={handleTrailerClick}
         />
 
-        {genreRows.map(
-          ({ label, movies }) =>
-            (loading || movies.length > 0) && (
-              <MovieRow
-                key={label}
-                title={label}
-                movies={movies}
-                loading={loading}
-                onTrailerClick={handleTrailerClick}
-              />
-            )
-        )}
+        {GENRE_ROWS.map(({ label, id }) => (
+          <PaginatedMovieRow
+            key={id}
+            title={label}
+            fetchFn={(p) => getMoviesByGenre(id, p)}
+            onTrailerClick={handleTrailerClick}
+          />
+        ))}
 
         {/* Discover More Section */}
-        {moreMovies.length > 0 && (
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-4">
-            <h2
-              className="text-xl sm:text-2xl font-bold tracking-wide uppercase mb-4"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Discover More
-            </h2>
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-4">
+          <h2
+            className="text-xl sm:text-2xl font-bold tracking-wide uppercase mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Discover More
+          </h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {moreMovies.map((movie, index) => (
-                <div
-                  key={`${movie.id}-${index}`}
-                  className="animate-fade-in shrink-0 flex justify-center"
-                >
-                  <MovieCard
-                    movie={movie}
-                    onTrailerClick={handleTrailerClick}
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {moreMovies.map((movie, index) => (
+              <div
+                key={`${movie.id}-${index}`}
+                className="animate-fade-in shrink-0 flex justify-center"
+              >
+                <MovieCard
+                  movie={movie}
+                  onTrailerClick={handleTrailerClick}
+                />
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Infinite scroll sentinel */}
         <div ref={sentinelRef} className="h-10 w-full" aria-hidden="true" />
@@ -179,4 +156,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Home

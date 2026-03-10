@@ -1,19 +1,18 @@
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchTrending } from '../redux/slices/moviesSlice'
-import MovieRow from '../components/MovieRow'
+import { useDispatch } from 'react-redux'
+import { addToHistory } from '../redux/slices/watchHistorySlice'
+import { getTVShows, getTVShowsByGenre } from '../services/moviesService'
+import PaginatedMovieRow from '../components/PaginatedMovieRow'
+import { useState } from 'react'
+import TrailerModal from '../components/TrailerModal'
 
 const TVShows = () => {
   const dispatch = useDispatch()
-  const { trending, loading } = useSelector((state) => state.movies)
+  const [activeTrailer, setActiveTrailer] = useState(null)
 
-  useEffect(() => {
-    if (trending.length === 0) dispatch(fetchTrending())
-  }, [dispatch, trending.length])
-
-  const shows = trending.filter((m) => m.media_type === 'tv')
-  const dramaShows = shows.filter((m) => m.genre_ids?.includes(18))
-  const actionShows = shows.filter((m) => m.genre_ids?.includes(28))
+  const handleTrailerClick = (movie) => {
+    dispatch(addToHistory(movie))
+    setActiveTrailer(movie)
+  }
 
   return (
     <div className="min-h-screen py-8" style={{ background: 'var(--bg)' }}>
@@ -29,30 +28,30 @@ const TVShows = () => {
         </p>
       </div>
 
-      {shows.length === 0 && !loading ? (
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div
-            className="flex flex-col items-center justify-center py-24 rounded-2xl"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <p className="text-lg font-semibold" style={{ color: 'var(--text-secondary)' }}>
-              No TV Shows in current trending data
-            </p>
-            <p className="mt-1 text-sm" style={{ color: 'var(--border)' }}>
-              The backend trending endpoint currently returns movies — TV shows will appear here when available
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <MovieRow title="All TV Shows" movies={shows} loading={loading} />
-          {dramaShows.length > 0 && (
-            <MovieRow title="Drama" movies={dramaShows} loading={false} />
-          )}
-          {actionShows.length > 0 && (
-            <MovieRow title="Action" movies={actionShows} loading={false} />
-          )}
-        </>
+      <PaginatedMovieRow 
+        title="All TV Shows" 
+        fetchFn={getTVShows} 
+        onTrailerClick={handleTrailerClick} 
+      />
+      
+      <PaginatedMovieRow 
+        title="Drama" 
+        fetchFn={(p) => getTVShowsByGenre(18, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      <PaginatedMovieRow 
+        title="Action" 
+        fetchFn={(p) => getTVShowsByGenre(28, p)} 
+        onTrailerClick={handleTrailerClick} 
+      />
+
+      {activeTrailer && (
+        <TrailerModal
+          movieId={activeTrailer.id}
+          title={activeTrailer.title || activeTrailer.name}
+          onClose={() => setActiveTrailer(null)}
+        />
       )}
     </div>
   )
