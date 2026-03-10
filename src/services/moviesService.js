@@ -24,3 +24,9 @@ export const getMovies = (page = 1) =>
 
 export const getTVShows = (page = 1) =>
   api.get('/movies/discover/tv', { params: { page } })
+
+export const getBollywoodMovies = (page = 1) =>
+  api.get('/movies/bollywood', { params: { page } })
+
+export const getBollywoodTV = (page = 1) =>
+  api.get('/movies/bollywood/tv', { params: { page } })

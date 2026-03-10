@@ -1,9 +1,12 @@
+import { useNavigate } from 'react-router-dom';
 import LazyImage from './LazyImage';
 
 const PersonCard = ({ person }) => {
+  const navigate = useNavigate();
   return (
     <div 
-      className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+      onClick={() => navigate(`/people/${person.id}`)}
+      className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
       {/* Image Container */}

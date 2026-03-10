@@ -13,6 +13,7 @@ const Favorites    = lazy(() => import('./pages/Favorites'))
 const WatchHistory = lazy(() => import('./pages/WatchHistory'))
 const Login        = lazy(() => import('./pages/Login'))
 const Signup       = lazy(() => import('./pages/Signup'))
+const PersonDetails = lazy(() => import('./pages/PersonDetails'))
 
 const PageFallback = () => (
   <div
@@ -32,6 +33,7 @@ const AnimatedRoutes = () => {
         <Route path="/movies"    element={<Movies />} />
         <Route path="/tvshows"   element={<TVShows />} />
         <Route path="/people"    element={<People />} />
+        <Route path="/people/:id" element={<PersonDetails />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/search"    element={<SearchResults />} />
         <Route path="/favorites" element={<Favorites />} />

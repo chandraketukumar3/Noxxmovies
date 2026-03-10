@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import MovieRow from './MovieRow'
 
-const PaginatedMovieRow = ({ title, fetchFn, onTrailerClick, mediaType }) => {
+const PaginatedMovieRow = ({ title, fetchFn, onTrailerClick, mediaType, genreId }) => {
   const [movies, setMovies] = useState([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -12,15 +12,17 @@ const PaginatedMovieRow = ({ title, fetchFn, onTrailerClick, mediaType }) => {
     setLoading(true)
     try {
       const res = await fetchFn(page)
-      const results = Array.isArray(res.data) ? res.data : res.data?.results || []
+      const data = Array.isArray(res.data) ? res.data : res.data?.results || []
       
-      if (results.length > 0) {
+      if (data.length > 0) {
         setMovies((prev) => {
-          // Filter out duplicates and ensure correct mediaType if specified
-          const newMovies = results.filter(m => {
+          // Filter out duplicates and ensure correct mediaType/genre if specified
+          const newMovies = data.filter(m => {
             const isDuplicate = prev.some(p => p.id === m.id)
             if (isDuplicate) return false
             if (mediaType && m.media_type && m.media_type !== mediaType) return false
+            // Genre filtering as requested by user
+            if (genreId && m.genre_ids && !m.genre_ids.includes(genreId)) return false
             return true
           })
           return [...prev, ...newMovies]

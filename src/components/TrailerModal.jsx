@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../services/api' // Use customized axios instance
 import axios from 'axios'
 
-const TrailerModal = ({ movieId, title, onClose }) => {
+const TrailerModal = ({ movieId, title, onClose, mediaType = 'movie' }) => {
   const [trailerKey, setTrailerKey] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -13,22 +13,13 @@ const TrailerModal = ({ movieId, title, onClose }) => {
         return
       }
       try {
-        const apiKey = import.meta.env.VITE_TMDB_API_KEY
-        if (!apiKey) {
-           console.error("TMDB API Key missing")
-           setLoading(false)
-           return
-        }
-        const res = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${apiKey}`)
+        // Use our backend trailer endpoint which handles movie/tv logic
+        const res = await api.get(`/movies/${movieId}/trailer`, {
+          params: { type: mediaType }
+        })
         
-        const videos = res.data?.results || []
-        
-        // Find specific trailer or fallback to any YouTube video
-        const trailer = videos.find((v) => v.type === "Trailer" && v.site === "YouTube") 
-          || videos.find((v) => v.site === "YouTube");
-          
-        if (trailer) {
-           setTrailerKey(trailer.key)
+        if (res.data && res.data.key) {
+          setTrailerKey(res.data.key)
         }
       } catch (error) {
         console.error("Error fetching trailer:", error)
@@ -38,7 +29,7 @@ const TrailerModal = ({ movieId, title, onClose }) => {
     }
 
     fetchTrailer()
-  }, [movieId])
+  }, [movieId, mediaType])
 
   useEffect(() => {
     const handleKey = (e) => {

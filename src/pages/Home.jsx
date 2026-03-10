@@ -4,15 +4,14 @@ import { useNavigate } from 'react-router-dom'
 import { fetchGenres } from '../redux/slices/moviesSlice'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import { toggleFavorite } from '../redux/slices/favoritesSlice'
-import HeroBanner from '../components/HeroBanner'
-import MovieRow from '../components/MovieRow'
+import HeroCarousel from '../components/HeroCarousel'
+import PaginatedMovieRow from '../components/PaginatedMovieRow'
 import TrailerModal from '../components/TrailerModal'
 import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 import api from '../services/api'
 import { getTrending, getMoviesByGenre } from '../services/moviesService'
-import PaginatedMovieRow from '../components/PaginatedMovieRow'
 
 const GENRE_ROWS = [
   { label: 'Action', id: 28 },
@@ -41,12 +40,6 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(fetchGenres())
-    // Fetch initial trending for HeroBanner
-    getTrending(1).then(res => {
-      if (res.data?.results?.length > 0) {
-        setTrendingHero(res.data.results[0])
-      }
-    })
   }, [dispatch])
 
   const loadMoreDiscover = useCallback(async () => {
@@ -87,13 +80,7 @@ const Home = () => {
 
   return (
     <div>
-      <HeroBanner
-        movie={trendingHero}
-        movieId={trendingHero?.id}
-        isFavorited={trendingHero ? favoriteIds.has(trendingHero.id) : false}
-        onMoreInfo={handleMoreInfo}
-        onAddToFavorites={handleAddToFavorites}
-      />
+      <HeroCarousel />
 
       <div className="py-2">
         <PaginatedMovieRow
