@@ -1,3 +1,5 @@
+import { useState, useCallback } from 'react'
+import { useDispatch } from 'react-redux'
 import { openTrailer } from '../redux/slices/trailerSlice'
 import { getTVShows, getTVShowsByGenre, getAnime } from '../services/moviesService'
 import PaginatedMovieRow from '../components/PaginatedMovieRow'
@@ -66,14 +68,7 @@ const TVShows = () => {
       />
       
       <PaginatedMovieRow 
-        title="Drama" 
-        genreId={18}
-        fetchFn={(p) => getTVShowsByGenre(18, p)} 
-        onTrailerClick={handleTrailerClick} 
-      />
-
-      <PaginatedMovieRow 
-        title="Action" 
+        title="Action & Adventure" 
         genreId={10759}
         fetchFn={(p) => getTVShowsByGenre(10759, p)} 
         onTrailerClick={handleTrailerClick} 
@@ -87,7 +82,7 @@ const TVShows = () => {
       />
 
       <PaginatedMovieRow 
-        title="Anime" 
+        title="Animation" 
         genreId={16}
         fetchFn={(p) => getAnime(p)} 
         onTrailerClick={handleTrailerClick} 
