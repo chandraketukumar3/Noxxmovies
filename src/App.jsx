@@ -53,9 +53,30 @@ const AnimatedRoutes = () => {
   )
 }
 
+import { useEffect } from 'react'
+import { supabase } from './services/supabaseClient'
+import { setUser } from './redux/slices/authSlice'
+
 function App() {
   const dispatch = useDispatch()
   const { isOpen, movie } = useSelector((state) => state.trailer)
+
+  useEffect(() => {
+    // Check current session
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      dispatch(setUser(session?.user || null))
+    }
+
+    getSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      dispatch(setUser(session?.user || null))
+    })
+
+    return () => subscription.unsubscribe()
+  }, [dispatch])
 
   return (
     <BrowserRouter>

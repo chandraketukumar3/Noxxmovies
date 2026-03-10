@@ -17,16 +17,9 @@ export const register = createAsyncThunk(
   'auth/register',
   async (user, thunkAPI) => {
     try {
-      const response = await authService.register(user)
-      if (response.data) {
-        localStorage.setItem('user', JSON.stringify(response.data))
-      }
-      return response.data
+      return await authService.register(user)
     } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString()
+      const message = error.message || error.toString()
       return thunkAPI.rejectWithValue(message)
     }
   }
@@ -35,24 +28,21 @@ export const register = createAsyncThunk(
 // Login user
 export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
   try {
-    const response = await authService.login(user)
-    if (response.data) {
-      localStorage.setItem('user', JSON.stringify(response.data))
-    }
-    return response.data
+    return await authService.login(user)
   } catch (error) {
-    const message =
-      (error.response && error.response.data && error.response.data.message) ||
-      error.message ||
-      error.toString()
+    const message = error.message || error.toString()
     return thunkAPI.rejectWithValue(message)
   }
 })
 
 // Logout user
-export const logout = createAsyncThunk('auth/logout', async () => {
-  await authService.logout()
-  localStorage.removeItem('user')
+export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
+  try {
+    await authService.logout()
+  } catch (error) {
+    const message = error.message || error.toString()
+    return thunkAPI.rejectWithValue(message)
+  }
 })
 
 export const authSlice = createSlice({
@@ -64,6 +54,9 @@ export const authSlice = createSlice({
       state.isSuccess = false
       state.isError = false
       state.message = ''
+    },
+    setUser: (state, action) => {
+      state.user = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -98,6 +91,7 @@ export const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null
+        state.isSuccess = false
       })
   },
 })
