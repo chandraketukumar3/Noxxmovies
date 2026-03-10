@@ -4,46 +4,28 @@ import { supabase } from "./supabaseClient"
 // Backend URL
 const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "https://noxxmoviesbackend.vercel.app/api");
 
-// Axios instance
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  timeout: 60000, // 60 seconds to avoid Render cold-start timeout
   headers: {
     "Content-Type": "application/json",
   },
 })
 
-// Request interceptor
+// Request interceptor to add Supabase token
 api.interceptors.request.use(
   async (config) => {
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (session?.access_token) {
-      config.headers.Authorization = `Bearer ${session.access_token}`
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`
+      }
+    } catch (err) {
+      console.error('Error getting session for interceptor:', err)
     }
-
     return config
   },
   (error) => Promise.reject(error)
-)
-
-// Response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.code === "ECONNABORTED") {
-      console.error("Request timeout — backend may be waking up (Render cold start)")
-    }
-
-    if (error.response) {
-      console.error("API Response Error:", error.response.data)
-    } else {
-      console.error("API Network Error:", error.message)
-    }
-
-    return Promise.reject(error)
-  }
 )
 
 export default api

@@ -1,7 +1,8 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { closeTrailer } from './redux/slices/trailerSlice'
+import { setUser } from './redux/slices/authSlice'
 import Navbar from './components/Navbar'
 import Loader from './components/Loader'
 import TrailerModal from './components/TrailerModal'
@@ -53,29 +54,31 @@ const AnimatedRoutes = () => {
   )
 }
 
-import { useEffect } from 'react'
-import { supabase } from './services/supabaseClient'
-import { setUser } from './redux/slices/authSlice'
-
 function App() {
   const dispatch = useDispatch()
   const { isOpen, movie } = useSelector((state) => state.trailer)
 
   useEffect(() => {
-    // Check current session
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      dispatch(setUser(session?.user || null))
+    // Sync auth state with Supabase
+    const syncAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        dispatch(setUser(session?.user || null))
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          dispatch(setUser(session?.user || null))
+        })
+
+        return () => subscription?.unsubscribe()
+      } catch (err) {
+        console.error('Auth sync error:', err)
+      }
     }
 
-    getSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      dispatch(setUser(session?.user || null))
-    })
-
-    return () => subscription.unsubscribe()
+    const cleanup = syncAuth()
+    return () => {
+      if (cleanup && typeof cleanup === 'function') cleanup()
+    }
   }, [dispatch])
 
   return (

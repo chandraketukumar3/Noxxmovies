@@ -1,8 +1,15 @@
 import { supabase } from './supabaseClient'
 
-// Register user
-export const register = async (userData) => {
-  const { email, password, name } = userData
+export const login = async ({ email, password }) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (error) throw error
+  return data.user
+}
+
+export const register = async ({ email, password, name }) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -12,39 +19,29 @@ export const register = async (userData) => {
       },
     },
   })
-  
   if (error) throw error
   return data.user
 }
 
-// Login user
-export const login = async (userData) => {
-  const { email, password } = userData
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) throw error
-  return data.user
-}
-
-// Logout user
 export const logout = async () => {
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
 
-// Get current session
-export const getSession = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  if (error) throw error
-  return session
+export const getCurrentUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
-// Get current user
-export const getUser = async () => {
-  const { data: { user }, error } = await supabase.auth.getUser()
+export const updateProfile = async (userData) => {
+  const { data, error } = await supabase.auth.updateUser({
+    data: userData
+  })
   if (error) throw error
-  return user
+  return data.user
+}
+
+export const updatePassword = async (password) => {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throw error
 }
