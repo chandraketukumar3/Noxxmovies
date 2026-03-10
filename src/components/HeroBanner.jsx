@@ -76,7 +76,7 @@ const HeroBanner = ({
   return (
     <>
       <section
-        className="relative w-full h-[70vh] min-h-[480px] max-h-[780px] overflow-hidden flex items-end"
+        className="relative w-full h-screen min-h-[600px] overflow-hidden flex items-center"
         aria-label={`Featured: ${displayTitle}`}
       >
         {/* Backdrop image */}
@@ -107,7 +107,7 @@ const HeroBanner = ({
         />
 
         {/* Content area */}
-        <div className="relative z-10 w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-0">
+        <div className="relative z-10 w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             {/* Genres */}
             {resolvedGenres.length > 0 && (
