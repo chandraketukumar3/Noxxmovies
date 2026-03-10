@@ -12,7 +12,7 @@ const PaginatedMovieRow = ({ title, fetchFn, onTrailerClick, mediaType }) => {
     setLoading(true)
     try {
       const res = await fetchFn(page)
-      const results = res.data?.results || []
+      const results = Array.isArray(res.data) ? res.data : res.data?.results || []
       
       if (results.length > 0) {
         setMovies((prev) => {

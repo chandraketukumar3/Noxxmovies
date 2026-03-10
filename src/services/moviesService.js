@@ -10,14 +10,17 @@ export const getMovieById = (id) => api.get(`/movies/${id}`)
 
 export const getGenres = () => api.get('/movies/genres')
 
+export const getTrendingPeople = (page = 1) =>
+  api.get('/movies/trending/people', { params: { page } })
+
 export const getMoviesByGenre = (genreId, page = 1) =>
-  api.get('/movies/discover', { params: { with_genres: genreId, page, type: 'movie' } })
+  api.get('/movies/discover/movies', { params: { with_genres: genreId, page } })
 
 export const getTVShowsByGenre = (genreId, page = 1) =>
-  api.get('/movies/discover', { params: { with_genres: genreId, page, type: 'tv' } })
+  api.get('/movies/discover/tv', { params: { with_genres: genreId, page } })
 
 export const getMovies = (page = 1) =>
-  api.get('/movies/discover', { params: { page, type: 'movie' } })
+  api.get('/movies/discover/movies', { params: { page } })
 
 export const getTVShows = (page = 1) =>
-  api.get('/movies/discover', { params: { page, type: 'tv' } })
+  api.get('/movies/discover/tv', { params: { page } })
