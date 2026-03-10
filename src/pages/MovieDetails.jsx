@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchMovieById, clearMovieDetail } from '../redux/slices/movieDetailSlice'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import { toggleFavorite } from '../redux/slices/favoritesSlice'
-import TrailerModal from '../components/TrailerModal'
+import { openTrailer } from '../redux/slices/trailerSlice'
 import Loader from '../components/Loader'
 
 const TMDB_IMAGE = (path, size = 'w500') =>
@@ -39,13 +39,22 @@ const MovieDetails = () => {
   const dispatch = useDispatch()
   const { movie, loading, error } = useSelector((state) => state.movieDetail)
   const favoriteIds = useSelector((state) => new Set(state.favorites.items.map((m) => m.id)))
-  const [showTrailer, setShowTrailer] = useState(false)
   const [imgError, setImgError] = useState(false)
+  const [retried, setRetried] = useState(false)
 
   useEffect(() => {
     dispatch(fetchMovieById(id))
     return () => dispatch(clearMovieDetail())
   }, [id, dispatch])
+
+  useEffect(() => {
+    if (error && !retried) {
+      setRetried(true)
+      setTimeout(() => {
+        dispatch(fetchMovieById(id))
+      }, 1000)
+    }
+  }, [error, retried, id, dispatch])
 
   useEffect(() => {
     if (movie) dispatch(addToHistory(movie))
@@ -54,11 +63,13 @@ const MovieDetails = () => {
   const isFavorited = movie ? favoriteIds.has(movie.id) : false
 
   const handleTrailerOpen = () => {
-    if (movie) dispatch(addToHistory(movie))
-    setShowTrailer(true)
+    if (movie) {
+      dispatch(addToHistory(movie))
+      dispatch(openTrailer(movie))
+    }
   }
 
-  if (loading) {
+  if (loading && !retried) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -69,7 +80,7 @@ const MovieDetails = () => {
     )
   }
 
-  if (error || !movie) {
+  if ((error && retried) || (!loading && !movie)) {
     return (
       <div className="min-h-screen py-16" style={{ background: 'var(--bg)' }}>
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -282,13 +293,6 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {showTrailer && (
-        <TrailerModal
-          movieId={movie.id}
-          title={displayTitle}
-          onClose={() => setShowTrailer(false)}
-        />
-      )}
     </div>
   )
 }

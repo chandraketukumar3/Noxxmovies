@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { fetchGenres } from '../redux/slices/moviesSlice'
 import { addToHistory } from '../redux/slices/watchHistorySlice'
 import { toggleFavorite } from '../redux/slices/favoritesSlice'
+import { openTrailer } from '../redux/slices/trailerSlice'
 import HeroCarousel from '../components/HeroCarousel'
 import PaginatedMovieRow from '../components/PaginatedMovieRow'
-import TrailerModal from '../components/TrailerModal'
 import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
@@ -31,7 +31,6 @@ const Home = () => {
   )
 
   const [trendingHero, setTrendingHero] = useState(null)
-  const [activeTrailer, setActiveTrailer] = useState(null)
 
   // Infinite scroll states for bottom "Discover More"
   const [page, setPage] = useState(1)
@@ -71,8 +70,7 @@ const Home = () => {
   const { sentinelRef } = useInfiniteScroll(loadMoreDiscover, hasMore, loadingMore)
 
   const handleTrailerClick = (movie) => {
-    dispatch(addToHistory(movie))
-    setActiveTrailer(movie)
+    dispatch(openTrailer(movie))
   }
 
   const handleMoreInfo = (movie) => navigate(`/movies/${movie.id}`)
@@ -134,13 +132,6 @@ const Home = () => {
         )}
       </div>
 
-      {activeTrailer && (
-        <TrailerModal
-          movieId={activeTrailer.id}
-          title={activeTrailer.title || activeTrailer.name}
-          onClose={() => setActiveTrailer(null)}
-        />
-      )}
     </div>
   )
 }

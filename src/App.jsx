@@ -1,7 +1,10 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { closeTrailer } from './redux/slices/trailerSlice'
 import Navbar from './components/Navbar'
 import Loader from './components/Loader'
+import TrailerModal from './components/TrailerModal'
 
 const Home         = lazy(() => import('./pages/Home'))
 const Movies       = lazy(() => import('./pages/Movies'))
@@ -46,6 +49,9 @@ const AnimatedRoutes = () => {
 }
 
 function App() {
+  const dispatch = useDispatch()
+  const { isOpen, movie } = useSelector((state) => state.trailer)
+
   return (
     <BrowserRouter>
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -55,6 +61,16 @@ function App() {
             <AnimatedRoutes />
           </Suspense>
         </main>
+
+        {isOpen && movie && (
+          <TrailerModal
+            movieId={movie.id}
+            title={movie.title || movie.name}
+            mediaType={movie.first_air_date ? 'tv' : 'movie'}
+            initialTrailerKey={movie.trailerKey}
+            onClose={() => dispatch(closeTrailer())}
+          />
+        )}
       </div>
     </BrowserRouter>
   )

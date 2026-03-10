@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { addToHistory } from '../redux/slices/watchHistorySlice'
-import TrailerModal from '../components/TrailerModal'
+import { openTrailer } from '../redux/slices/trailerSlice'
 import MovieCard from '../components/MovieCard'
 import Loader from '../components/Loader'
 import PaginatedMovieRow from '../components/PaginatedMovieRow'
@@ -10,7 +9,6 @@ import { getMovies, getMoviesByGenre } from '../services/moviesService'
 
 const Movies = () => {
   const dispatch = useDispatch()
-  const [activeTrailer, setActiveTrailer] = useState(null)
   
   // Infinite scroll for bottom section
   const [page, setPage] = useState(1)
@@ -46,8 +44,7 @@ const Movies = () => {
   const { sentinelRef } = useInfiniteScroll(loadMoreMovies, hasMore, loadingMore)
 
   const handleTrailerClick = (movie) => {
-    dispatch(addToHistory(movie))
-    setActiveTrailer(movie)
+    dispatch(openTrailer(movie))
   }
 
   return (
@@ -118,14 +115,6 @@ const Movies = () => {
           <p className="text-center mt-10 text-[var(--text-secondary)]">You reached the end.</p>
         )}
       </div>
-
-      {activeTrailer && (
-        <TrailerModal
-          movieId={activeTrailer.id}
-          title={activeTrailer.title || activeTrailer.name}
-          onClose={() => setActiveTrailer(null)}
-        />
-      )}
     </div>
   )
 }

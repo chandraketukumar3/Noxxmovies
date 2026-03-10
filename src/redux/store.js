@@ -4,6 +4,7 @@ import searchReducer from './slices/searchSlice'
 import movieDetailReducer from './slices/movieDetailSlice'
 import favoritesReducer from './slices/favoritesSlice'
 import watchHistoryReducer from './slices/watchHistorySlice'
+import trailerReducer from './slices/trailerSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     movieDetail: movieDetailReducer,
     favorites: favoritesReducer,
     watchHistory: watchHistoryReducer,
+    trailer: trailerReducer,
   },
 })
 

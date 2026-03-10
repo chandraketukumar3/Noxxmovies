@@ -22,20 +22,52 @@ const HeroCarousel = () => {
     useEffect(() => {
         const fetchCarouselData = async () => {
             try {
-                const [moviesRes, tvRes] = await Promise.all([
+                // Fetch Bollywood, Trending Movies, and Trending TV
+                const [bollyMoviesRes, bollyTVRes, trendingMoviesRes, trendingTVRes] = await Promise.all([
                     getBollywoodMovies(1),
-                    getBollywoodTV(1)
+                    getBollywoodTV(1),
+                    getTrending(1), // trending movies
+                    api.get('/movies/trending/tv', { params: { page: 1 } })
                 ]);
 
-                const movies = moviesRes.data || [];
-                const tvSeries = tvRes.data || [];
+                const allItems = [
+                    ...(bollyMoviesRes.data || []),
+                    ...(bollyTVRes.data || []),
+                    ...(trendingMoviesRes.data || []),
+                    ...(trendingTVRes.data || [])
+                ];
 
-                // Combine and sort by popularity, take top 12
-                const combined = [...movies, ...tvSeries]
-                    .sort((a, b) => b.popularity - a.popularity)
-                    .slice(0, 12);
+                // Remove duplicates by ID
+                const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values());
+                
+                // Shuffle and take top 20 to check for trailers
+                const candidates = uniqueItems
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 20);
 
-                setItems(combined);
+                const itemsWithTrailers = [];
+
+                // Fetch trailers for candidates
+                for (const item of candidates) {
+                    if (itemsWithTrailers.length >= 12) break;
+
+                    try {
+                        const type = item.first_air_date ? 'tv' : 'movie';
+                        const trailerRes = await api.get(`/movies/${item.id}/trailer`, { params: { type } });
+                        
+                        if (trailerRes.data && trailerRes.data.key) {
+                            itemsWithTrailers.push({
+                                ...item,
+                                trailerKey: trailerRes.data.key,
+                                mediaType: type
+                            });
+                        }
+                    } catch (e) {
+                        console.error(`Failed to fetch trailer for ${item.id}`, e);
+                    }
+                }
+
+                setItems(itemsWithTrailers);
             } catch (error) {
                 console.error("Error fetching carousel data:", error);
             } finally {
@@ -80,6 +112,8 @@ const HeroCarousel = () => {
                             movie={item} 
                             movieId={item.id}
                             isFavorited={favoriteIds.has(item.id)}
+                            trailerKey={item.trailerKey}
+                            mediaType={item.mediaType}
                             onMoreInfo={handleMoreInfo}
                             onAddToFavorites={handleAddToFavorites}
                         />

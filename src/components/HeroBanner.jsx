@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import TrailerModal from './TrailerModal'
+import { useDispatch } from 'react-redux'
+import { openTrailer } from '../redux/slices/trailerSlice'
 
 const FALLBACK_BACKDROP =
   'https://via.placeholder.com/1280x720/12121A/A1A1AA?text=NoxMovies'
@@ -34,9 +35,11 @@ const HeroBanner = ({
   isFavorited = false,
   onMoreInfo,
   onAddToFavorites,
+  trailerKey = null,
+  mediaType = 'movie',
   genreMap = {},
 }) => {
-  const [showTrailer, setShowTrailer] = useState(false)
+  const dispatch = useDispatch()
   const [imgError, setImgError] = useState(false)
 
   if (!movie) return null
@@ -155,7 +158,7 @@ const HeroBanner = ({
             <div className="flex flex-wrap gap-3">
               <button
                 className="btn-primary"
-                onClick={() => setShowTrailer(true)}
+                onClick={() => dispatch(openTrailer({ ...movie, trailerKey }))}
                 aria-label={`Play trailer for ${displayTitle}`}
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -210,14 +213,6 @@ const HeroBanner = ({
         </div>
       </section>
 
-      {showTrailer && (
-        <TrailerModal
-          movieId={movieId}
-          title={displayTitle}
-          mediaType={movie.first_air_date ? 'tv' : 'movie'}
-          onClose={() => setShowTrailer(false)}
-        />
-      )}
     </>
   )
 }

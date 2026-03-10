@@ -2,18 +2,18 @@ import { useEffect, useState } from 'react'
 import api from '../services/api' // Use customized axios instance
 import axios from 'axios'
 
-const TrailerModal = ({ movieId, title, onClose, mediaType = 'movie' }) => {
-  const [trailerKey, setTrailerKey] = useState(null)
-  const [loading, setLoading] = useState(true)
+const TrailerModal = ({ movieId, title, onClose, mediaType = 'movie', initialTrailerKey = null }) => {
+  const [trailerKey, setTrailerKey] = useState(initialTrailerKey)
+  const [loading, setLoading] = useState(!initialTrailerKey)
 
   useEffect(() => {
     const fetchTrailer = async () => {
+      if (initialTrailerKey) return;
       if (!movieId) {
         setLoading(false)
         return
       }
       try {
-        // Use our backend trailer endpoint which handles movie/tv logic
         const res = await api.get(`/movies/${movieId}/trailer`, {
           params: { type: mediaType }
         })
@@ -29,7 +29,7 @@ const TrailerModal = ({ movieId, title, onClose, mediaType = 'movie' }) => {
     }
 
     fetchTrailer()
-  }, [movieId, mediaType])
+  }, [movieId, mediaType, initialTrailerKey])
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -59,12 +59,15 @@ const TrailerModal = ({ movieId, title, onClose, mediaType = 'movie' }) => {
 
       {/* Modal box: Perfectly Centered */}
       <div
-        className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden z-10 flex flex-col shadow-2xl bg-[#1a1a1e] border border-white/10"
+        className="relative rounded-2xl overflow-hidden z-[1001] flex flex-col shadow-2xl bg-[#1a1a1e] border border-white/10"
         style={{
           position: 'fixed',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
+          width: 'min(90vw, 900px)',
+          aspectRatio: '16 / 9',
+          zIndex: 1000,
         }}
         onClick={(e) => e.stopPropagation()}
       >
