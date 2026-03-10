@@ -30,10 +30,24 @@ const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
   return (
     <article
       className="movie-card w-36 sm:w-44 md:w-48"
-      onClick={() => navigate(detailPath)}
+      onClick={() => {
+        if (!user) {
+          dispatch(openAuthModal('Sign up or log in to view details'))
+          return
+        }
+        navigate(detailPath)
+      }}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(detailPath)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          if (!user) {
+            dispatch(openAuthModal('Sign up or log in to view details'))
+            return
+          }
+          navigate(detailPath)
+        }
+      }}
       aria-label={`View ${displayTitle}`}
     >
       {/* Poster */}
@@ -89,7 +103,13 @@ const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
         )}
         <div className="flex gap-1">
           <button
-            onClick={() => navigate(detailPath)}
+            onClick={() => {
+              if (!user) {
+                dispatch(openAuthModal('Sign up or log in to view details'))
+                return
+              }
+              navigate(detailPath)
+            }}
             className="flex-1 text-xs py-1 rounded-md font-semibold tracking-wide"
             style={{
               background: 'var(--primary)',

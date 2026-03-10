@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
+import { openAuthModal } from '../redux/slices/uiSlice';
 import { toggleFavorite } from '../redux/slices/favoritesSlice';
 import { getBollywoodMovies, getBollywoodTV, getTrending } from '../services/moviesService';
 import api from '../services/api';
@@ -13,6 +14,7 @@ import "slick-carousel/slick/slick-theme.css";
 const HeroCarousel = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -80,10 +82,18 @@ const HeroCarousel = () => {
     }, []);
 
     const handleMoreInfo = (movie) => {
+        if (!user) {
+            dispatch(openAuthModal('Sign up or log in to view details'))
+            return
+        }
         navigate(`/movies/${movie.id}`);
     };
 
     const handleAddToFavorites = (movie) => {
+        if (!user) {
+            dispatch(openAuthModal('Sign up or log in to manage favorites'))
+            return
+        }
         dispatch(toggleFavorite(movie));
     };
 

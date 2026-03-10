@@ -36,8 +36,15 @@ const StarRow = ({ value }) => {
 
 const MovieDetails = () => {
   const { id } = useParams()
+  const { user } = useSelector((state) => state.auth)
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (!user) {
+      dispatch(openAuthModal('Sign up or log in to access this page'))
+    }
+  }, [user, dispatch])
   const { movie, loading, error } = useSelector((state) => state.movieDetail)
   const favoriteIds = useSelector((state) => new Set(state.favorites.items.map((m) => m.id)))
   const [imgError, setImgError] = useState(false)

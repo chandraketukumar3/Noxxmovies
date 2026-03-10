@@ -177,7 +177,13 @@ const HeroBanner = ({
 
               <button
                 className="btn-secondary"
-                onClick={() => onMoreInfo?.(movie)}
+                onClick={() => {
+                  if (!user) {
+                    dispatch(openAuthModal('Sign up or log in to view details'))
+                    return
+                  }
+                  onMoreInfo?.(movie)
+                }}
                 aria-label={`More info about ${displayTitle}`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
