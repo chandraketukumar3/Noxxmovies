@@ -41,11 +41,11 @@ const MovieRow = ({
       },
       {
         breakpoint: 768,
-        settings: { slidesToShow: 3 }
+        settings: { slidesToShow: 3.2, arrows: false }
       },
       {
         breakpoint: 480,
-        settings: { slidesToShow: 2 }
+        settings: { slidesToShow: 2.2, arrows: false }
       }
     ]
   }
@@ -102,6 +102,9 @@ const MovieRow = ({
         }
         .slick-prev { left: -20px; }
         .slick-next { right: -20px; }
+        @media (max-width: 768px) {
+          .slick-prev, .slick-next { display: none !important; }
+        }
         .slick-prev:before, .slick-next:before {
           font-family: 'slick';
           font-size: 24px;
@@ -109,6 +112,12 @@ const MovieRow = ({
         .movie-carousel-container .slick-list {
           overflow: visible;
           padding: 10px 0;
+        }
+        @media (max-width: 768px) {
+          .movie-carousel-container .slick-list {
+            padding-left: 0;
+            margin-right: -12px;
+          }
         }
         .movie-carousel-container .slick-track {
           display: flex !important;

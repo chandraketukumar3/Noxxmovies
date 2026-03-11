@@ -29,7 +29,7 @@ const MovieCard = ({ movie, onTrailerClick, onRemove }) => {
 
   return (
     <article
-      className="movie-card w-36 sm:w-44 md:w-48"
+      className="movie-card w-[140px] sm:w-44 md:w-48"
       onClick={() => {
         if (!user) {
           dispatch(openAuthModal('Sign up or log in to view details'))

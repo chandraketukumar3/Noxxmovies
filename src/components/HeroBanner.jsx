@@ -127,7 +127,7 @@ const HeroBanner = ({
 
             {/* Title */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-wide leading-tight mb-3"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-wide leading-tight mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               {displayTitle}
@@ -157,9 +157,9 @@ const HeroBanner = ({
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <button
-                className="btn-primary"
+                className="btn-primary w-full sm:w-auto justify-center"
                 onClick={() => {
                   if (!user) {
                     dispatch(openAuthModal('Sign up or log in to play trailers'))
@@ -176,7 +176,7 @@ const HeroBanner = ({
               </button>
 
               <button
-                className="btn-secondary"
+                className="btn-secondary w-full sm:w-auto justify-center"
                 onClick={() => {
                   if (!user) {
                     dispatch(openAuthModal('Sign up or log in to view details'))
@@ -193,7 +193,7 @@ const HeroBanner = ({
               </button>
 
               <button
-                className="btn-secondary"
+                className="btn-secondary w-full sm:w-auto justify-center"
                 onClick={() => {
                   if (!user) {
                     dispatch(openAuthModal('Sign up or log in to manage favorites'))
