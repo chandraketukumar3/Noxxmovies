@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import { login, reset } from '../redux/slices/authSlice'
+import { useAuth } from '../hooks/useAuth'
 import Loader from '../components/Loader'
 
 const Login = () => {
@@ -15,9 +16,9 @@ const Login = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  )
+  const auth = useAuth?.() || {}
+  const user = auth?.user ?? null
+  const { isLoading, isError, isSuccess, message } = auth
 
   useEffect(() => {
     if (isError) {
